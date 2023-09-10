@@ -7,18 +7,16 @@ use sqlx::FromRow;
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
     #[serde(rename = "id")]
-    #[serde(alias = "id")]
-    pub Id: i64,
-    #[serde(rename = "user_code")]
-    #[serde(alias = "userCode")]
-    pub UserCode: String,
-    #[serde(rename = "nick_name")]
-    #[serde(alias = "nickName")]
-    pub NickName: String,
-    #[serde(rename = "password")]
-    #[serde(alias = "passWord")]
-    pub PassWord: String,
-    #[serde(rename = "create_time")]
-    #[serde(alias = "createTime")]
-    pub CreateTime: NaiveDateTime,
+    pub id: i64,
+
+    #[serde(rename = "userCode")]
+    pub user_code: String,
+
+    #[serde(rename = "nickName")]
+    pub nick_name: String,
+
+    pub password: String,
+
+    #[serde(rename = "createTime")]
+    pub create_time: NaiveDateTime,
 }
