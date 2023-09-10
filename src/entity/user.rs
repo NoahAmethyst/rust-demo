@@ -15,7 +15,7 @@ pub struct User {
     #[serde(rename = "nick_name")]
     #[serde(alias = "nickName")]
     pub NickName: String,
-    #[serde(rename = "pass_word")]
+    #[serde(rename = "password")]
     #[serde(alias = "passWord")]
     pub PassWord: String,
     #[serde(rename = "create_time")]

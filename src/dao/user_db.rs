@@ -14,7 +14,7 @@ pub async fn query_user() -> Result<Vec<entity::User>, sqlx::Error> {
 
     let mut conn = pool.acquire().await?;
 
-    let rows = sqlx::query_as::<_, entity::User>("select id,user_code,nick_name,pass_word,create_time from bg_user")
+    let rows = sqlx::query_as::<_, entity::User>("select id,user_code,nick_name,password,create_time from bg_user")
         .fetch_all(&mut conn)
         .await?;
 
