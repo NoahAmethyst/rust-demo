@@ -19,8 +19,8 @@ async fn main() {
         .init();
     // our router
     let app = Router::new()
-        .route("/", get(controller::user))
-        .route("/foo", get(controller::get_foo).post(controller::post_foo))
+        .route("/user", get(controller::user))
+        .route("/kube/pods", get(controller::pods).post(controller::post_foo))
         .route("/foo/bar", get(controller::foo_bar));
 
     // run it with hyper on localhost:3000

@@ -6,9 +6,9 @@ use sqlx::mysql::MySqlConnectOptions;
 
 static MYSQL_POOL: OnceCell<MySqlPool> = OnceCell::new();
 
-//建立mysql连接
+// connect to mysql
 pub async fn init_db_pool() -> Result<(), Error> {
-    //在取env时需要使用dotenv  要不取的是系统的
+    //When fetching env, you need to use dotenv. Otherwise, it is systematic.
     dotenv().ok();
     // let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_username = env::var("DB_USERNAME").expect("DB_USERNAME must be set");
