@@ -26,6 +26,7 @@ pub async fn user() -> Json<Vec<dao::entity::User>> {
     }
 }
 
+// get kubernetes pod list
 pub async fn pods() -> Json<ObjectList<Pod>> {
     let result = kube::pod_list();
     // match result.await {
@@ -38,6 +39,7 @@ pub async fn pods() -> Json<ObjectList<Pod>> {
     return Json(result.await);
 }
 
+// create resnet pod
 pub async fn pod_create() -> Json<Option<Pod>> {
     let result = kube::pod_create();
     return Json(result.await);
