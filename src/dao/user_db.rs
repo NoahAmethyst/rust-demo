@@ -1,7 +1,7 @@
 use sqlx::mysql::MySqlPoolOptions;
 use dotenv::dotenv;
 use log::error;
-use crate::mysql::get_pool;
+use crate::mysql::get_mysql;
 
 pub(crate) mod entity {
     include!("../entity/user.rs");
@@ -9,8 +9,7 @@ pub(crate) mod entity {
 
 
 pub async fn query_user() -> Result<Vec<entity::User>, sqlx::Error> {
-    let pool = get_pool().expect("Failed to acquire connection pool");
-    ;
+    let pool = get_mysql().expect("Failed to acquire connection pool");
 
     let mut conn = pool.acquire().await?;
 

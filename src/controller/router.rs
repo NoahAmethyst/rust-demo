@@ -2,6 +2,7 @@ use std::{result, time};
 use std::future::Future;
 use ::kube::api::ObjectList;
 use ::kube::config::KubeconfigError;
+use ::kube::Error;
 use axum::Json;
 use k8s_openapi::api::core::v1::Pod;
 use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::JSON;
@@ -34,11 +35,12 @@ pub async fn pods() -> Json<ObjectList<Pod>> {
     //         Json(ObjectList{ metadata: Default::default(), items: vec![] })
     //     }
     // }
-    return Json(result.await)
+    return Json(result.await);
 }
 
-pub async fn post_foo() -> String {
-    String::from("post:foo")
+pub async fn pod_create() -> Json<Option<Pod>> {
+    let result = kube::pod_create();
+    return Json(result.await);
 }
 
 pub async fn foo_bar() -> String {

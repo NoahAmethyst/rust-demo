@@ -43,7 +43,7 @@ pub async fn init_db_pool() -> Result<(), Error> {
     Ok(())
 }
 
-//获取数据库
-pub fn get_pool() -> Option<&'static MySqlPool> {
+// get database
+pub fn get_mysql() -> Option<&'static MySqlPool> {
     MYSQL_POOL.get()
 }
