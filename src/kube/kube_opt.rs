@@ -75,6 +75,7 @@ pub async fn pod_create(req: PodReq) -> Option<Pod> {
             let name = o.name_any();
             assert_eq!(p.name_any(), name);
             info!("Created {}", name);
+            return Some(o);
         }
         // Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
         Err(e) => { error!("{:?}",e.to_string()); }                        // any other case is probably bad
@@ -98,13 +99,6 @@ pub async fn get_logs(req: PodReq) -> Vec<String> {
     } else {
         panic!("kube client error")
     };
-
-    // Get current list of logs
-    let lp = LogParams {
-        follow: true,
-        ..LogParams::default()
-    };
-
 
     let all_logs = pods.logs(&req.pod_name.unwrap(), &Default::default()).await.unwrap();
 
