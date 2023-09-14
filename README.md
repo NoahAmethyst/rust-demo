@@ -6,6 +6,42 @@ This is a background of Resnet algorithm training based on kubernetes. It uses R
 the database framework, and kubers as the K8s api package. It provides the functions of viewing pods based on http api,
 creating pod of Resnet, and viewing logs.
 
+*Please note that you should create your own train data in /bitnami/model-data or specify the mounting directory*
+FOr example:
+```json
+ {
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "resnet"
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "resnet",
+        "image": "bitnami/tensorflow-serving:latest",
+        "volumeMounts": [
+          {
+            "mountPath": "/bitnami/model-data",
+            "name": "model-data"
+          }
+        ]
+      }
+    ],
+    "volumes": [
+      {
+        "name": "model-data",
+        "hostPath": {
+          "path": "/root/resnet/model-data"
+        }
+      }
+    ]
+  }
+}
+
+
+```
+
 
 ----
 
