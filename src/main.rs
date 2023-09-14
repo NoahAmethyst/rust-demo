@@ -1,5 +1,7 @@
+use std::env;
 use axum::{Router,
-           handler::get};
+           handler::get, handler::post};
+use dotenv::dotenv;
 use log::{info, warn};
 
 mod controller {
@@ -12,9 +14,10 @@ mod kube_cli;
 #[tokio::main]
 async fn main() {
 
-    //连接数据库
-    mysql::init_db_pool().await;
-    kube_cli::init_kube_cli().await;
+    //connect to mysql
+    let _ = mysql::init_db_pool().await;
+    //connect to kubernetes
+    let _ = kube_cli::init_kube_cli().await;
     // logger
     env_logger::Builder::new()
         .filter_level(log::LevelFilter::Info) // 设置日志级别为 Info
@@ -22,11 +25,20 @@ async fn main() {
     // our router
     let app = Router::new()
         .route("/user", get(controller::user))
-        .route("/kube/pods", get(controller::pods))
-        .route("/kube/pod/create", get(controller::pod_create));
+        .route("/kube/:namespace/pods", get(
+            move |path| controller::pods(path)))
+        .route("/kube/:namespace/pod/create", post(
+            move |path, body| controller::pod_create(path, body)))
+        .route("/kube/:namespace/pod/logs",
+               get(
+                   move |path, body| controller::pod_logs(path, body)));
 
-    // run it with hyper on localhost:3000
-    let addr = "0.0.0.0:3000";
+
+    dotenv().ok();
+    // run it with hyper on localhost:8080
+    let server_port = env::var("SERVER_PORT").unwrap_or(String::from("8080"));
+    let mut addr = String::from("0.0.0.0:");
+    addr.push_str(&server_port);
     info!("server start at {}",addr);
     axum::Server::bind(&addr.parse().unwrap())
         .serve(app.into_make_service())

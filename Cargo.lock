@@ -3,6 +3,27 @@
 version = 3
 
 [[package]]
+name = "actix-macros"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e01ed3140b2f8d422c68afa1ed2e85d996ea619c988ac834d255db32138655cb"
+dependencies = [
+ "quote",
+ "syn 2.0.28",
+]
+
+[[package]]
+name = "actix-rt"
+version = "2.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28f32d40287d3f402ae0028a9d54bef51af15c8769492826a69d28f81893151d"
+dependencies = [
+ "actix-macros",
+ "futures-core",
+ "tokio 1.29.1",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -982,10 +1003,13 @@ dependencies = [
 name = "helloworld"
 version = "0.1.0"
 dependencies = [
+ "actix-rt",
  "axum",
  "chrono",
  "dotenv",
  "env_logger",
+ "futures",
+ "futures-util",
  "k8s-openapi",
  "kube",
  "log",
@@ -995,6 +1019,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio 1.29.1",
+ "tokio-stream",
 ]
 
 [[package]]

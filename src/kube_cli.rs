@@ -38,3 +38,43 @@ pub async fn init_kube_cli() -> Result<(), Error> {
 pub fn get_kube_cli() -> Option<&'static Client> {
     KUBE_CLI.get()
 }
+
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod kube_cli {
+    use futures_util::{AsyncBufReadExt, TryStreamExt};
+    use kube::api::LogParams;
+    use log::log;
+    use super::*;
+
+    #[actix_rt::test]
+    async fn kube_get_log() {
+        let _ = init_kube_cli().await;
+        let cli = get_kube_cli();
+        let pods: Api<Pod> = if let Some(c) = cli {
+            let _cli = c.clone();
+            Api::default_namespaced(_cli)
+        } else {
+            panic!("kube client error")
+        };
+        // Get current list of logs
+        let lp = LogParams {
+            follow: true,
+            ..LogParams::default()
+        };
+        // let mut logs_stream = pods.log_stream("qq-bot-86dbd58985-fxsff", &lp).await.unwrap().lines();
+        //
+        // // wait for container to finish
+        // tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
+        let all_logs = pods.logs("qq-bot-86dbd58985-fxsff", &Default::default()).await.unwrap();
+        println!("{}", all_logs);
+
+
+        // individual logs may or may not buffer
+
+        // while let Some(line) = logs_stream.try_next().await.unwrap() {
+        //     print!("{}", line);
+        // }
+    }
+}
