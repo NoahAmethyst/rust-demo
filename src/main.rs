@@ -26,15 +26,15 @@ async fn main() {
     let app = Router::new()
         .route("/user", get(controller::user))
         .route("/kube/:namespace/pods", get(
-            move |path| controller::pods(path)))
+            move |path| controller::pods(path)))//get pod list of specific namespace
         .route("/kube/:namespace/pod/create", post(
-            move |path, body| controller::pod_create(path, body)))
+            move |path, body| controller::pod_create(path, body)))//create pod in specific namespace
         .route("/kube/:namespace/pod/logs",
                get(
-                   move |path, body| controller::pod_logs(path, body)))
+                   move |path, body| controller::pod_logs(path, body)))//get logs of specific pod of specific namespace
         .route("/kube/:namespace/pod",
                get(
-                   move |path, body| controller::pod_info(path, body)));
+                   move |path, body| controller::pod_info(path, body)));//get information of specific pod of specific namespace
 
 
     dotenv().ok();
