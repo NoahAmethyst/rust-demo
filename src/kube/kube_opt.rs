@@ -17,7 +17,7 @@ pub(crate) mod entity {
     include!("../entity/kube_req.rs");
 }
 
-
+// get pods
 pub async fn pod_list(namespace: String) -> ObjectList<Pod> {
     // dotenv().ok();
     // let kube_config = env::var("KUBE_CONFIG").unwrap_or(String::from("~/.kube/config"));
@@ -43,6 +43,9 @@ pub async fn pod_list(namespace: String) -> ObjectList<Pod> {
     return pod_list;
 }
 
+
+// Create pod.
+// For now it's create pod of resnet.
 pub async fn pod_create(req: PodReq) -> Option<Pod> {
     let client = get_kube_cli();
 
@@ -87,7 +90,9 @@ pub async fn pod_create(req: PodReq) -> Option<Pod> {
     return establish;
 }
 
-pub async fn get_logs(req: PodReq) -> Vec<String> {
+
+// Get logs of specific pod.It return logs once.
+pub async fn pod_logs(req: PodReq) -> Vec<String> {
     let client = get_kube_cli();
 
     // Manage pods
@@ -108,3 +113,23 @@ pub async fn get_logs(req: PodReq) -> Vec<String> {
 
     return lines;
 }
+
+
+// Get information of specific pod.
+pub async fn pod_info(req: PodReq) -> Pod {
+    let client = get_kube_cli();
+
+    // Manage pods
+    // let pods: Api<Pod> = Api::default_namespaced(*client);
+
+    let pods: Api<Pod> = if let Some(c) = client {
+        let _cli = c.clone();
+        Api::namespaced(_cli, &req.namespace.unwrap_or(String::from("default")))
+    } else {
+        panic!("kube client error")
+    };
+
+    let result = pods.get(&req.pod_name.unwrap()).await.unwrap();
+    return result;
+}
+

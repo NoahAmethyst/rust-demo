@@ -55,7 +55,13 @@ pub async fn pod_create(Path(namespace): Path<String>, mut req: Json<entity::Pod
 
 pub async fn pod_logs(Path(namespace): Path<String>, mut req: Query<entity::PodReq>) -> Json<Vec<String>> {
     req.0.namespace = Some(namespace);
-    let result = kube::get_logs(req.0);
+    let result = kube::pod_logs(req.0);
+    return Json(result.await);
+}
+
+pub async fn pod_info(Path(namespace): Path<String>, mut req: Query<entity::PodReq>) -> Json<Pod> {
+    req.0.namespace = Some(namespace);
+    let result = kube::pod_info(req.0);
     return Json(result.await);
 }
 

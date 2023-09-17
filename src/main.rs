@@ -31,7 +31,10 @@ async fn main() {
             move |path, body| controller::pod_create(path, body)))
         .route("/kube/:namespace/pod/logs",
                get(
-                   move |path, body| controller::pod_logs(path, body)));
+                   move |path, body| controller::pod_logs(path, body)))
+        .route("/kube/:namespace/pod",
+               get(
+                   move |path, body| controller::pod_info(path, body)));
 
 
     dotenv().ok();
