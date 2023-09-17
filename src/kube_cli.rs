@@ -21,16 +21,11 @@ pub async fn init_kube_cli() -> Result<(), Error> {
     let mut config = Config::from_custom_kubeconfig(kube_cfg, &kube_config_option).await.unwrap();
     config.accept_invalid_certs = true;
     let client = Client::try_from(config)?;
-    // match client {
-    //     Ok(client) => {
-    //         info!("Init kubernetes client successful!");
-    //         client
-    //     }
-    //     Err(err) => {
-    //         println!("Failed to init kubernetes client: {:?}", err);
-    //     }
-    // };
     assert!(KUBE_CLI.set(client).is_ok());
+    //Todo why info not work
+    info!("connect to kubernetes success.");
+    println!("connect to kubernetes success.");
+
     Ok(())
 }
 

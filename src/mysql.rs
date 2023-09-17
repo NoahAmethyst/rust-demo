@@ -1,6 +1,7 @@
 use dotenv::dotenv;
 use sqlx::{mysql::MySqlPoolOptions, Error, MySqlPool};
 use std::{env, process};
+use log::{error, info, log};
 use once_cell::sync::OnceCell;
 use sqlx::mysql::MySqlConnectOptions;
 
@@ -15,9 +16,9 @@ pub async fn init_db_pool() -> Result<(), Error> {
     let db_password = env::var("DB_PASSWORD").expect("DB_PASSWORD must be set");
     let db_host = env::var("DB_HOST").expect("DB_HOST must be set");
     let _db_port = env::var("DB_PORT").expect("DB_PORT must be set");
-    let db_port=_db_port.parse::<u16>().unwrap();
+    let db_port = _db_port.parse::<u16>().unwrap();
     let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
-    let conn_opt=MySqlConnectOptions::new()
+    let conn_opt = MySqlConnectOptions::new()
         .username(&db_username)
         .password(&db_password)
         .host(&db_host)
@@ -30,12 +31,15 @@ pub async fn init_db_pool() -> Result<(), Error> {
         // .connect(&database_url)
         .await
     {
+        //Todo why info not working
         Ok(pool) => {
+            info!("Connection to the database[{:?}] success.",db_host);
             println!("✅Connection to the database is successful!");
             pool
         }
         Err(err) => {
-            println!("🔥 Failed to connect to the database: {:?}", err);
+            error!("Failed to connect to the database[{:?}]: {:?}",db_host,err);
+            // println!("🔥 Failed to connect to the database: {:?}", err);
             process::exit(1);
         }
     };

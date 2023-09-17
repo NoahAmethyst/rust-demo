@@ -31,11 +31,8 @@ pub async fn user() -> Json<Vec<dao::entity::User>> {
 
 // get kubernetes pod list
 pub async fn pods(Path(namespace): Path<String>) -> Json<ObjectList<Pod>> {
-    let mut _namespace = namespace.clone();
-    if _namespace.is_empty() {
-        _namespace = String::from("default");
-    }
-    let result = kube::pod_list(_namespace);
+    let _namespace = namespace.clone();
+    let result = kube::pod_list(namespace);
     // match result.await {
     //     Ok(pod_list)=>Json(pod_list),
     //     Err(err)=> {
@@ -43,25 +40,36 @@ pub async fn pods(Path(namespace): Path<String>) -> Json<ObjectList<Pod>> {
     //         Json(ObjectList{ metadata: Default::default(), items: vec![] })
     //     }
     // }
+
+    kube::run_watcher(_namespace).await;
     return Json(result.await);
 }
 
 // create resnet pod
 pub async fn pod_create(Path(namespace): Path<String>, mut req: Json<entity::PodReq>) -> Json<Option<Pod>> {
+    let _namespace = namespace.clone();
     req.0.namespace = Some(namespace);
     let result = kube::pod_create(req.0);
+
+    kube::run_watcher(_namespace).await;
     return Json(result.await);
 }
 
 pub async fn pod_logs(Path(namespace): Path<String>, mut req: Query<entity::PodReq>) -> Json<Vec<String>> {
+    let _namespace = namespace.clone();
     req.0.namespace = Some(namespace);
     let result = kube::pod_logs(req.0);
+
+    kube::run_watcher(_namespace).await;
     return Json(result.await);
 }
 
 pub async fn pod_info(Path(namespace): Path<String>, mut req: Query<entity::PodReq>) -> Json<Pod> {
+    let _namespace = namespace.clone();
     req.0.namespace = Some(namespace);
     let result = kube::pod_info(req.0);
+
+    kube::run_watcher(_namespace).await;
     return Json(result.await);
 }
 

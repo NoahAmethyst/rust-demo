@@ -2,19 +2,85 @@ use std::convert::TryFrom;
 use k8s_openapi::api::core::v1::Pod;
 use serde_json::json;
 use dotenv::dotenv;
-use kube::{api::{Api, DeleteParams, ListParams, Patch, PatchParams, PostParams, ResourceExt}, runtime::wait::{await_condition, conditions::is_pod_running}, Client, client, config, Config, Error};
+use kube::{api::{Api, DeleteParams, ListParams, Patch, PatchParams, PostParams, ResourceExt}, runtime::wait::{await_condition, conditions::is_pod_running}, Client, client, config, Error};
 use kube::api::{LogParams, ObjectList};
 use kube::config::{Kubeconfig, KubeconfigError, KubeConfigOptions};
 use log::{error, info};
 use std::{env, process};
 use std::io::BufRead;
+use std::os::unix::raw::mode_t;
 use axum::Json;
 use crate::controller::entity::PodReq;
 use crate::kube_cli::get_kube_cli;
-use futures::{StreamExt, TryStreamExt, AsyncBufReadExt};
+use futures::{TryStreamExt, AsyncBufReadExt};
+use futures_util::future::err;
+use futures_util::TryFutureExt;
+use kube::runtime::{watcher, WatchStreamExt};
+use kube::runtime::watcher::{Config, Event};
+use tokio::pin;
+use tokio::sync::RwLock;
+use once_cell::sync::Lazy;
+use tokio::runtime::Runtime;
 
 pub(crate) mod entity {
     include!("../entity/kube_req.rs");
+}
+
+static mut WATCHER_START: Lazy<RwLock<bool>> = Lazy::new(|| RwLock::from(false));
+
+
+pub async fn run_watcher(namespace: String) {
+    tokio::spawn(async move {
+        println!("run watch");
+        unsafe {
+            let start = WATCHER_START.read().await;
+            // No need to run watcher again if it is started before.
+            if *start {
+                println!("already start,no need to run");
+                return;
+            }
+        }
+
+        let client = get_kube_cli();
+
+        let pods: Api<Pod> = if let Some(c) = client {
+            let _cli = c.clone();
+            Api::namespaced(_cli, &namespace)
+        } else {
+            panic!("kube client error")
+        };
+
+        // create an event watcher
+        let mut watcher = watcher(pods, Config::default());
+        pin!(watcher);
+
+
+        unsafe {
+            let mut start = WATCHER_START.write().await;
+            *start = true;
+        }
+        // loop deal the events
+        loop {
+            println!("loop watch");
+            match watcher.try_next().await {
+                Ok(event) => {
+                    match event {
+                        Some(Event::Applied(pod)) => {
+                            println!("Pod Applied: {:?}", pod.metadata.name);
+                        }
+                        Some(Event::Deleted(pod)) => {
+                            println!("Pod Deleted: {:?}", pod.metadata.name);
+                        }
+
+                        _ => {}
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error: {:?}", e);
+                }
+            }
+        }
+    });
 }
 
 // get pods
