@@ -75,14 +75,17 @@ SERVER_PORT=8080
 ### Api
 
 ```curl
+# Login
+post /auth/login
+
 # Get pod list
-/kube/:namespace/pods
+get /kube/:namespace/pods
 
 # Create pod,for now it is Resnet pod
-/kube/:namespace/pod/create
+post /kube/:namespace/pod/create
 
 # Get logs specific pod
-/kube/:namespace/pod/logs
+get /kube/:namespace/pod/logs
 ```
 
 
