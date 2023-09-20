@@ -1,6 +1,6 @@
 # rust-demo
 
-Rust demo project with web server and mysql.
+Rust demo project with web server、mysql and kubernetes operator.
 
 This is a background of Resnet algorithm training based on kubernetes. It uses Rust AXUM as the web framework, SQLX as
 the database framework, and kubers as the K8s api package. It provides the functions of viewing pods based on http api,
