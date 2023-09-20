@@ -1,22 +1,36 @@
 use std::time::SystemTime;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use serde::{Serialize, Deserialize};
 use sqlx::FromRow;
 
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
-    #[serde(rename = "id")]
     pub id: i64,
 
-    #[serde(rename = "userCode")]
-    pub user_code: String,
-
-    #[serde(rename = "nickName")]
-    pub nick_name: String,
+    pub account: String,
 
     pub password: String,
 
+    pub token: Option<String>,
+
+    #[serde(rename = "tokenExpire")]
+    pub token_expire: Option<DateTime<Local>>,
+
     #[serde(rename = "createTime")]
-    pub create_time: NaiveDateTime,
+    pub create_time: DateTime<Local>,
+}
+
+
+#[derive(Serialize, Deserialize)]
+pub struct AuthReq {
+    pub account: String,
+
+    pub password: String,
+}
+
+
+#[derive(Serialize, Deserialize)]
+pub struct AuthResp {
+    pub token: String,
 }

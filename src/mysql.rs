@@ -4,6 +4,7 @@ use std::{env, process};
 use log::{error, info, log};
 use once_cell::sync::OnceCell;
 use sqlx::mysql::MySqlConnectOptions;
+use tokio::fs;
 
 static MYSQL_POOL: OnceCell<MySqlPool> = OnceCell::new();
 
@@ -46,6 +47,75 @@ pub async fn init_db_pool() -> Result<(), Error> {
     assert!(MYSQL_POOL.set(pool).is_ok());
     Ok(())
 }
+
+// Read immigration file to initialize data of database.
+pub async fn init_db_table() {
+    let pool = get_mysql().expect("Failed to acquire connection pool");
+
+    // read sql from file
+    let sql_file = "./resource/immigration.sql";
+    let sql_content = fs::read_to_string(sql_file).await;
+    match sql_content {
+        Ok(sql) => {
+            let result = sqlx::query(&*sql)
+                .execute(&*pool).await;
+
+            match result {
+                Ok(affected) => {
+                    if affected.rows_affected() > 0 {
+                        println!("initialize tables success");
+                    } else {
+                        println!("no need to initialize")
+                    }
+                }
+
+                Err(err) => {
+                    println!("initialize data failed:{:?}", err)
+                }
+            }
+        }
+
+        Err(err) => {
+            println!("initialize tables failed:{:?}", err);
+        }
+    }
+}
+
+
+// Read immigration file to initialize data of database.
+pub async fn init_db_data() {
+    let pool = get_mysql().expect("Failed to acquire connection pool");
+
+    // read sql from file
+    let sql_file = "./resource/data.sql";
+    let sql_content = fs::read_to_string(sql_file).await;
+    match sql_content {
+        Ok(sql) => {
+            let result = sqlx::query(&*sql)
+                .execute(&*pool).await;
+
+            match result {
+                Ok(affected) => {
+                    if affected.rows_affected() > 0 {
+                        println!("initialize data success");
+                    } else {
+                        println!("no need to initialize")
+                    }
+                }
+
+                Err(err) => {
+                    println!("initialize data failed:{:?}", err)
+                }
+            }
+        }
+
+        Err(err) => {
+            println!("initialize data failed:{:?}", err);
+        }
+    }
+}
+
+
 
 // get database
 pub fn get_mysql() -> Option<&'static MySqlPool> {

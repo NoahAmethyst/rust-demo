@@ -10,7 +10,7 @@ use std::{env, process};
 use std::io::BufRead;
 use std::os::unix::raw::mode_t;
 use axum::Json;
-use crate::controller::entity::PodReq;
+use crate::api::kube::entity::PodReq;
 use crate::kube_cli::get_kube_cli;
 use futures::{TryStreamExt, AsyncBufReadExt};
 use futures_util::future::err;
@@ -158,7 +158,7 @@ pub async fn pod_create(req: PodReq) -> Option<Pod> {
 
 
 // Get logs of specific pod.It return logs once.
-pub async fn pod_logs(req: PodReq) -> Vec<String> {
+pub async fn pod_logs(req: PodReq) -> Result<Vec<String>, Error> {
     let client = get_kube_cli();
 
     // Manage pods
@@ -171,18 +171,25 @@ pub async fn pod_logs(req: PodReq) -> Vec<String> {
         panic!("kube client error")
     };
 
-    let all_logs = pods.logs(&req.pod_name.unwrap(), &Default::default()).await.unwrap();
+    let result = pods.logs(&req.pod_name.unwrap(), &Default::default()).await;
 
-    let lines = all_logs.split("\n").map(|s| s.to_string())
-        .filter(|s| !s.is_empty()).collect();
-    // output.append(line.to_string());
+    return match result {
+        Ok(logs)=>{
+            let lines = logs.split("\n").map(|s| s.to_string())
+                .filter(|s| !s.is_empty()).collect();
+            Ok(lines)
+        }
 
-    return lines;
+        Err(err)=>{
+            Err(err)
+        }
+    }
+
 }
 
 
 // Get information of specific pod.
-pub async fn pod_info(req: PodReq) -> Pod {
+pub async fn pod_info(req: PodReq) -> Result<Pod, Error> {
     let client = get_kube_cli();
 
     // Manage pods
@@ -195,7 +202,14 @@ pub async fn pod_info(req: PodReq) -> Pod {
         panic!("kube client error")
     };
 
-    let result = pods.get(&req.pod_name.unwrap()).await.unwrap();
-    return result;
+    let result = pods.get(&req.pod_name.unwrap()).await;
+    return match result {
+        Ok(pod) => {
+            Ok(pod)
+        }
+        Err(err) => {
+            Err(err)
+        }
+    };
 }
 
