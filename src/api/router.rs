@@ -8,16 +8,12 @@ use axum::http::{HeaderMap, HeaderValue};
 use k8s_openapi::api::core::v1::{Namespace, Pod};
 use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::JSON;
 use log::{error, info};
-use crate::api::dao::entity::{AuthReq, AuthResp};
 use crate::api::kube::entity::PodReq;
 use crate::api::service::common_entity::Resp;
+use crate::api::service::user_entity::{AuthReq, AuthResp};
 
 
-mod dao {
-    include!("../dao/user_db.rs");
-}
-
-mod kube {
+pub(crate) mod kube {
     include!("../kube/kube_opt.rs");
 }
 
@@ -66,7 +62,7 @@ pub async fn pods(Path(namespace): Path<String>, headers: HeaderMap) -> Json<Res
     }
     let _namespace = namespace.clone();
     let result = kube::pod_list(namespace).await;
-    kube::run_watcher(_namespace).await;
+
     resp.data = Some(result);
 
     return Json(resp);
@@ -90,7 +86,6 @@ pub async fn pod_create(Path(namespace): Path<String>, mut req: Json<PodReq>, he
 
     let result = kube::pod_create(req.0).await;
 
-    kube::run_watcher(_namespace).await;
     resp.data = Some(result);
 
     return Json(resp);
@@ -121,9 +116,6 @@ pub async fn pod_logs(Path(namespace): Path<String>, mut req: Query<PodReq>, hea
         }
     }
 
-    kube::run_watcher(_namespace).await;
-
-
     return Json(resp);
 }
 
@@ -150,9 +142,6 @@ pub async fn pod_info(Path(namespace): Path<String>, mut req: Query<PodReq>, hea
             resp.message = Some(err.to_string())
         }
     }
-
-
-    kube::run_watcher(_namespace).await;
 
     return Json(resp);
 }

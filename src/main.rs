@@ -8,9 +8,14 @@ use dotenv::dotenv;
 use k8s_openapi::api::core::v1::Pod;
 use kube::api::ObjectList;
 use log::{info, warn};
+use crate::api::kube::monitor;
 
 mod api {
     include!("./api/router.rs");
+}
+
+mod kube_opt {
+    include!("./kube/kube_opt.rs");
 }
 
 
@@ -27,6 +32,8 @@ async fn main() {
     mysql::init_db_data().await;
     //connect to kubernetes
     let _ = kube_cli::init_kube_cli().await;
+
+    monitor().await;
 
     // logger
     env_logger::Builder::new()

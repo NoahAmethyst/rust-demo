@@ -17,7 +17,7 @@ create table if not exists `user`
 create table if not exists logs
 (
     id          int auto_increment,
-    hash_code   int         default 0     not null,
+    hash_code   bigint         default 0     not null,
     app         varchar(20) default ''    not null,
     pod         varchar(36) default ''    not null,
     content     text                      not null,

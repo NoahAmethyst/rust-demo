@@ -4,15 +4,12 @@ use sqlx::mysql::MySqlPoolOptions;
 use dotenv::dotenv;
 
 use log::error;
-use crate::api::dao::entity::User;
+use crate::api::service::user_entity::{AuthReq, User};
 use crate::mysql::get_mysql;
 
-pub(crate) mod entity {
-    include!("../entity/user.rs");
-}
 
 
-pub async fn query_user_by_account(req: entity::AuthReq) -> Result<User, Error> {
+pub async fn query_user_by_account(req: AuthReq) -> Result<User, Error> {
     let pool = get_mysql().expect("Failed to acquire connection pool");
 
     let mut conn = pool.acquire().await.unwrap();

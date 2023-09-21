@@ -124,9 +124,8 @@ mod kube_cli {
         match result {
             Ok(namespaces) => {
                 for namespace in namespaces.iter(){
-                    println!("{:?}", namespace)
+                    println!("{:?}", namespace.metadata.name.clone().unwrap())
                 }
-
             }
 
             Err(err) => {
