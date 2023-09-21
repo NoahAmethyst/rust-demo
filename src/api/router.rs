@@ -5,7 +5,7 @@ use ::kube::config::KubeconfigError;
 use ::kube::Error;
 use axum::extract::{Path, Query, Json, Form};
 use axum::http::{HeaderMap, HeaderValue};
-use k8s_openapi::api::core::v1::Pod;
+use k8s_openapi::api::core::v1::{Namespace, Pod};
 use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::JSON;
 use log::{error, info};
 use crate::api::dao::entity::{AuthReq, AuthResp};
@@ -29,6 +29,26 @@ mod service {
 pub async fn login(Form(req): Form<AuthReq>) -> Json<Resp<AuthResp>> {
     let result = service::login(req).await;
     return Json(result);
+}
+
+// get kubernetes pod list
+pub async fn namespaces(headers: HeaderMap) -> Json<Resp<ObjectList<Namespace>>> {
+    let mut resp = Resp {
+        data: None,
+        message: None,
+    };
+
+    let token = headers.get("Authorization").unwrap().to_str();
+    let checked = service::auth(token.unwrap().to_string()).await;
+    if !checked {
+        resp.message = Some(String::from("unauthorized,please login first."));
+        return Json(resp);
+    }
+    let result = kube::namespaces().await;
+
+    resp.data = Some(result);
+
+    return Json(resp);
 }
 
 // get kubernetes pod list

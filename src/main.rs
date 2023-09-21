@@ -36,6 +36,9 @@ async fn main() {
     let app = Router::new()
         //login
         .route("/auth/login", post(api::login))
+        //get kubernetes namespaces
+        .route("/kube/namespaces", get(
+            move |headers| api::namespaces(headers)))
         //get pod list of specific namespace
         .route("/kube/:namespace/pods", get(
             move |path, headers| api::pods(path, headers)))

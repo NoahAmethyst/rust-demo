@@ -37,13 +37,15 @@ pub fn get_kube_cli() -> Option<&'static Client> {
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod kube_cli {
-    use futures_util::{AsyncBufReadExt, TryStreamExt};
+    use std::io::{BufRead, Lines};
+    use futures_util::{TryStreamExt, AsyncBufReadExt};
+    use k8s_openapi::api::core::v1::Namespace;
     use kube::api::LogParams;
     use log::log;
     use super::*;
 
     #[actix_rt::test]
-    async fn kube_get_log() {
+    async fn kube_get_all_log() {
         let _ = init_kube_cli().await;
         let cli = get_kube_cli();
         let pods: Api<Pod> = if let Some(c) = cli {
@@ -71,5 +73,65 @@ mod kube_cli {
         // while let Some(line) = logs_stream.try_next().await.unwrap() {
         //     print!("{}", line);
         // }
+    }
+
+
+    #[actix_rt::test]
+    async fn kube_get_log_stream() {
+        let _ = init_kube_cli().await;
+        let cli = get_kube_cli();
+        let pods: Api<Pod> = if let Some(c) = cli {
+            let _cli = c.clone();
+            Api::default_namespaced(_cli)
+        } else {
+            panic!("kube client error")
+        };
+        // Get current list of logs
+        let lp = LogParams {
+            follow: true,
+            ..LogParams::default()
+        };
+
+        let mut logs_stream;
+        let result = pods.log_stream("qq-bot-86dbd58985-dp5h4", &lp);
+        match result.await {
+            Ok(stream) => { logs_stream = stream.lines() }
+            Err(err) => {
+                panic!("{:?}", err.to_string())
+            }
+        }
+
+        // individual logs may or may not buffer
+        while let line = logs_stream.try_next().await.unwrap() {
+            println!("{:?}", String::from(line.unwrap()));
+        }
+    }
+
+
+    #[actix_rt::test]
+    async fn kube_namespaces() {
+        let _ = init_kube_cli().await;
+        let cli = get_kube_cli();
+        let namespaces: Api<Namespace> = if let Some(c) = cli {
+            let _cli = c.clone();
+            Api::all(_cli)
+        } else {
+            panic!("kube client error")
+        };
+
+        let lp = ListParams::default();
+        let result = namespaces.list(&lp).await;
+        match result {
+            Ok(namespaces) => {
+                for namespace in namespaces.iter(){
+                    println!("{:?}", namespace)
+                }
+
+            }
+
+            Err(err) => {
+                panic!(err.to_string())
+            }
+        }
     }
 }

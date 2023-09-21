@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use k8s_openapi::api::core::v1::Pod;
+use k8s_openapi::api::core::v1::{Namespace, Pod};
 use serde_json::json;
 use dotenv::dotenv;
 use kube::{api::{Api, DeleteParams, ListParams, Patch, PatchParams, PostParams, ResourceExt}, runtime::wait::{await_condition, conditions::is_pod_running}, Client, client, config, Error};
@@ -82,6 +82,25 @@ pub async fn run_watcher(namespace: String) {
         }
     });
 }
+
+
+// get namespaces
+pub async fn namespaces() -> ObjectList<Namespace> {
+    let client = get_kube_cli();
+
+    let namespaces: Api<Namespace> = if let Some(c) = client {
+        let _cli = c.clone();
+        Api::all(_cli)
+    } else {
+        panic!("kube client error")
+    };
+
+    let lp = ListParams::default();
+    let result = namespaces.list(&lp).await.unwrap();
+
+    return result;
+}
+
 
 // get pods
 pub async fn pod_list(namespace: String) -> ObjectList<Pod> {

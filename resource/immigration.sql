@@ -13,3 +13,20 @@ create table if not exists `user`
     unique (token)
     );
 
+-- create table logs
+create table if not exists logs
+(
+    id          int auto_increment,
+    hash_code   int         default 0     not null,
+    app         varchar(20) default ''    not null,
+    pod         varchar(36) default ''    not null,
+    content     text                      not null,
+    create_time timestamp   default now() not null,
+    constraint `primary`
+        primary key (id),
+    constraint unique_index
+        unique (hash_code, pod)
+);
+
+
+
