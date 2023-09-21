@@ -78,6 +78,8 @@ SERVER_PORT=8080
 # Login
 post /auth/login
 
+# Get Namespaces
+get /kube/namespaces
 # Get pod list
 get /kube/:namespace/pods
 
